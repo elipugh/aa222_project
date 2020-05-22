@@ -30,6 +30,8 @@ class Parameters(object):
 
 class Coefficients(object):
     '''
+    Credit for this class goes to
+    https://github.com/mbodmer/libairfoil
     This class calculates the equation systems which define the coefficients
     for the polynomials given by the parsec airfoil parameters.
     '''
@@ -70,7 +72,11 @@ class Coefficients(object):
              [1.0,           0.0,          0.0,         0.0,          0.0,          0.0        ]])
 
 class Airfoil(object):
-    '''Airfoil defined by PARSEC Parameters'''
+    '''
+    Credit for this class goes to
+    https://github.com/mbodmer/libairfoil
+    Airfoil defined by PARSEC Parameters
+    '''
     def __init__(self, parsec_params):
         self._coeff = Coefficients(parsec_params)
         
