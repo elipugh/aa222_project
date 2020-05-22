@@ -77,7 +77,7 @@ def evaluate(filename):
 class Xfoil():
     def __init__(self):
         """Spawn xfoil child process"""
-        path = os.path.expanduser('~/Documents/class_materials/_taking/aa222/project/Airfoil-Optimization/xfoil')
+        path = os.path.dirname(os.path.realpath(__file__))
         # self.xfinst = subp.Popen(os.path.join(path, 'xfoil'), stdin=subp.PIPE)
         self.xfinst = subp.Popen(os.path.join(path, 'xfoil'), stdin=subp.PIPE, stdout=open(os.devnull, 'w'))
         self._stdin = self.xfinst.stdin

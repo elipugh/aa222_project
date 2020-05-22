@@ -1,6 +1,5 @@
 from __future__ import division
 import numpy as np
-# Import N(mu, sigma) and U[0,1) function
 from numpy.random import normal, uniform
 from copy import copy
 
