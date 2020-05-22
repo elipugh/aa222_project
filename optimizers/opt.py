@@ -15,7 +15,8 @@ def optimize(f, x0, n):
     """
     pass
 
-# alpha, CL, CD, CDp, CM, Top_Xtr, Bot_Xtr = xfoil.evaluate("/users/EliPugh/custom4.txt")
-# print(CD)
+# Example
+if __name__ == "__main__":
+    pass
 
 

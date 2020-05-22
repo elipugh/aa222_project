@@ -3,8 +3,7 @@ import numpy as np
 import os
 import re
 import time
-from Queue import Queue, Empty
-from threading import Thread
+
 
 # Evaluate the different characteristics
 # of an airfoil

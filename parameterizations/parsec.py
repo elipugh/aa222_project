@@ -2,6 +2,7 @@ from __future__ import division
 import numpy as np
 import math
 
+
 class Parameters(object):
     '''Parameters defining a PARSEC airfoil'''   
     def __init__(self, x):
