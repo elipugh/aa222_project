@@ -5,9 +5,8 @@ from parameterizations.parsec import Airfoil
 import os
 
 
-
-
-
+# Perform an objective function
+# evaluation at x
 def evaluation(x):
     filename = "evaluation.dat"
     airfoil = Airfoil(x)
@@ -19,8 +18,6 @@ def evaluation(x):
     return CD
 
 x0 = np.array([0.4, 0.3, 0.3, 2, np.pi/2])
-
 CD = evaluation(x0)
-
 print(CD)
 
