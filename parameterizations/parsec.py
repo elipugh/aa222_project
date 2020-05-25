@@ -7,14 +7,17 @@ class Parameters(object):
     '''Parameters defining a PARSEC airfoil'''   
     def __init__(self, x):
 
-        if x.shape != (5,):
-            print("5d np array expected")
+        if x.shape > (6,):
+            print("5 or 6d np array expected")
 
         front_radius        = x[0]
         x_cross_section     = x[1]
         cross_section_width = x[2]
         sides_curve         = x[3]
         rear_angle          = x[4]
+        trunc               = 1
+        if x.size > 5:
+            trunc               = x[5]
 
         self.r_le       = front_radius              # Leading edge radius
         self.X_up       = x_cross_section           # Upper crest location X coordinate
@@ -28,6 +31,7 @@ class Parameters(object):
         self.alpha_te   = 0 # static                # Trailing edge direction angle
         self.beta_te    = rear_angle #(radians)     # Trailing edge wedge angle
         self.P_mix      = 1.0                       # Blending parameter
+        self.trunc      = min(trunc,1)              # Where we truncate
 
 class Coefficients(object):
     '''
@@ -84,15 +88,18 @@ class Airfoil(object):
     def Z_up(self, X):
         '''Returns Z(X) on upper surface, calculates PARSEC polynomial'''
         a = self._coeff.a_up()
-        # print(a)
-        return a[0]*X**0.5 + a[1]*X**1.5 + a[2]*X**2.5 + a[3]*X**3.5 + a[4]*X**4.5 + a[5]*X**5.5
-        
-    
+        X = X * self._coeff.params.trunc
+        foil = a[0]*X**0.5 + a[1]*X**1.5 + a[2]*X**2.5 + a[3]*X**3.5 + a[4]*X**4.5 + a[5]*X**5.5
+        # foil[-1] = 0
+        return foil
+
     def Z_lo(self, X):
         '''Returns Z(X) on lower surface, calculates PARSEC polynomial'''
         a = self._coeff.a_lo()
-        # print(a)
-        return a[0]*X**0.5 + a[1]*X**1.5 + a[2]*X**2.5 + a[3]*X**3.5 + a[4]*X**4.5 + a[5]*X**5.5
+        X = X * self._coeff.params.trunc
+        foil = a[0]*X**0.5 + a[1]*X**1.5 + a[2]*X**2.5 + a[3]*X**3.5 + a[4]*X**4.5 + a[5]*X**5.5
+        # foil[-1] = 0
+        return foil
 
 
 
