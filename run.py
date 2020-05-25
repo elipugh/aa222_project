@@ -2,8 +2,7 @@ import numpy as np
 import scipy.optimize as sp
 from xfoil import xfoil
 from parameterizations.helpers import fn_2_dat
-# from parameterizations.parsec import Airfoil
-from parameterizations.truncated_parsec import Airfoil
+from parameterizations.parsec import Airfoil
 import os
 import random
 
