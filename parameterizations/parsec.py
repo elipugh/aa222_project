@@ -106,7 +106,7 @@ if __name__ == "__main__":
     
     # # # import matplotlib.pyplot as plt
     
-    # params = Parameters(np.array([0.4, 0.3, 0.3, 2, np.pi/2]))
+    # params = np.array([0.4, 0.3, 0.3, 2, np.pi/2])
     # airfoil = Airfoil(params)
     
     # x = np.linspace(0.0, 1.0, 150)
