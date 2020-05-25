@@ -1,8 +1,11 @@
 import subprocess as subp
 import numpy as np
 import os
+import sys
 import re
 import time
+import random
+import sys
 
 
 # Evaluate the different characteristics
@@ -12,8 +15,8 @@ import time
 #   - Mach number set to 0.03
 #   - Max 10k iterations
 #   - Visuous flow
-#   - Evals at 0, 0.5, 2, 4, 8, 12 degrees
-def evaluate(filename):
+#   - Evals at each degree in angles
+def evaluate(filename, angles, viscous):
     curdir = os.path.dirname(os.path.realpath(__file__))
     xf = Xfoil()
     # Normalize foil
@@ -21,7 +24,7 @@ def evaluate(filename):
     # Load foil
     xf.cmd('LOAD {}\n'.format(filename))
     # Disable graphing
-    xf.cmd("PLOP\nG\n\n")
+    xf.cmd("PLOP\nG F\n\n")
     # Set options for panels
     xf.cmd("PPAR\n")
     xf.cmd("N 240\n")
@@ -33,21 +36,19 @@ def evaluate(filename):
     xf.cmd("Re 38000\n")
     # Set Mach
     xf.cmd("Mach 0.03\n")
-    # Viscous mode
-    xf.cmd("v\n")
+    if viscous:
+        # Viscous mode
+        xf.cmd("v\n")
     # Allow more iterations
     xf.cmd("ITER 10000\n")
     # Get started with an eval
     xf.cmd("ALFA 0\n")
     # Set recording to file sf.txt
-    xf.cmd("PACC\nsf.txt\n\n")
+    savefile = "sf{}.txt".format(random.randrange(10**20)%(10**15))
+    xf.cmd("PACC\n{}\n\n".format(savefile))
     # Run evals for 0deg to 12deg
-    xf.cmd("ALFA 0\n")
-    xf.cmd("ALFA 0.5\n")
-    xf.cmd("ALFA 2\n")
-    xf.cmd("ALFA 4\n")
-    xf.cmd("ALFA 8\n")
-    xf.cmd("ALFA 12\n")
+    for a in angles:
+        xf.cmd("ALFA {}\n".format(a))
     # End recording
     xf.cmd("PACC\n\n\nQUIT\n")
     # Don't try to read results before
@@ -59,28 +60,71 @@ def evaluate(filename):
     CD = []
     CDp = []
     CM = []
-    Top_Xtr = []
-    Bot_Xtr = []
-    # open log savefile and read
-    # results into arrays to return
-    with open("sf.txt", "r") as f:
-        for _ in range(12):
-            f.next()
-        for line in f:
-            if line is None:
-                break
-            a = line.split()
-            alpha   += [a[0]]
-            CL      += [a[1]]
-            CD      += [a[2]]
-            CDp     += [a[3]]
-            CM      += [a[4]]
-            Top_Xtr += [a[5]]
-            Bot_Xtr += [a[6]]
-    # Remove savefile
-    os.remove("sf.txt")
+
+    try:
+        # open log savefile and read
+        # results into arrays to return
+        with open(savefile, "r") as f:
+            for _ in range(12):
+                f.next()
+            for line in f:
+                if line is not None:
+                    r = line.replace("-", " -").split()
+                    alpha   += [float(r[0])]
+                    CL      += [float(r[1])]
+                    CD      += [float(r[2])]
+                    CDp     += [float(r[3])]
+                    CM      += [float(r[4])]
+    except:
+        print(sys.exc_info())
+        # probably worst case,
+        # nothing converged,
+        # hence no savefile?
+        print("Uh oh. Delete savefile then retry")
+        return None
+
+    dnc = []
+    for i,a in enumerate(angles):
+        if a not in alpha:
+            dnc += [i]
+
+    if len(dnc)>0:
+        print "Angles did not converge:\n\t", np.array(angles)[dnc]
+
+    # Worst case scenario, nothing converges
+    if len(dnc) == len(angles):
+        return None
+
+    worsts = [0, 0, 0, 0]
+    for i in range(len(alpha)):
+        if CL[i] > worsts[0]:
+            worsts[0] = CL[i]
+        if CD[i] > worsts[1]:
+            worsts[1] = CD[i]
+        if CDp[i] > worsts[2]:
+            worsts[2] = CDp[i]
+        if CM[i] > worsts[3]:
+            worsts[3] = CM[i]
+
+    for i in dnc:
+        alpha.insert(i, angles[i])
+        CL.insert(i, worsts[0])
+        CD.insert(i, worsts[1])
+        CDp.insert(i, worsts[2])
+        CM.insert(i, worsts[3])
+
+    try:
+        # Remove savefile
+        os.remove(savefile)
+    except:
+        # probably worst case,
+        # nothing converged,
+        # hence no savefile?
+        print("fail rm {}".format(savefile))
+        pass
+
     # Return results
-    return alpha, CL, CD, CDp, CM, Top_Xtr, Bot_Xtr
+    return alpha, CL, CD, CDp, CM
 
 
 class Xfoil():
@@ -89,9 +133,9 @@ class Xfoil():
         self.xfsubprocess = subp.Popen(os.path.join(path, 'xfoil'), stdin=subp.PIPE, stdout=open(os.devnull, 'w'))
         self._stdin = self.xfsubprocess.stdin
     def cmd(self, cmd):
-        self.xfinst.stdin.write(cmd)
+        self.xfsubprocess.stdin.write(cmd)
     def wait_to_finish(self):
-        self.xfinst.wait()
+        self.xfsubprocess.wait()
 
 # Example
 if __name__ == "__main__":
