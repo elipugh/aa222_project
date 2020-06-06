@@ -40,7 +40,7 @@ def evaluate(filename, angles, viscous):
         # Viscous mode
         xf.cmd("v\n")
     # Allow more iterations
-    xf.cmd("ITER 10000\n")
+    xf.cmd("ITER 1000\n")
     # Get started with an eval
     xf.cmd("ALFA 0\n")
     # Set recording to file sf.txt
@@ -88,30 +88,52 @@ def evaluate(filename, angles, viscous):
         if a not in alpha:
             dnc += [i]
 
-    if len(dnc)>0:
-        print "Angles did not converge:\n\t", np.array(angles)[dnc]
-
     # Worst case scenario, nothing converges
     if len(dnc) == len(angles):
         return None
 
-    worsts = [0, 0, 0, 0]
-    for i in range(len(alpha)):
-        if CL[i] > worsts[0]:
-            worsts[0] = CL[i]
-        if CD[i] > worsts[1]:
-            worsts[1] = CD[i]
-        if CDp[i] > worsts[2]:
-            worsts[2] = CDp[i]
-        if CM[i] > worsts[3]:
-            worsts[3] = CM[i]
+    # worsts = [0, 0, 0, 0]
+    # for i in range(len(alpha)):
+    #     if CL[i] > worsts[0]:
+    #         worsts[0] = CL[i]
+    #     if CD[i] > worsts[1]:
+    #         worsts[1] = CD[i]
+    #     if CDp[i] > worsts[2]:
+    #         worsts[2] = CDp[i]
+    #     if CM[i] > worsts[3]:
+    #         worsts[3] = CM[i]
 
-    for i in dnc:
-        alpha.insert(i, angles[i])
-        CL.insert(i, worsts[0])
-        CD.insert(i, worsts[1])
-        CDp.insert(i, worsts[2])
-        CM.insert(i, worsts[3])
+    if len(dnc)>0:
+        print "Angles did not converge:\n\t", np.array(angles)[dnc]
+        # experimental, but seems to improve
+        # accuracy of guess of unconverged
+        # performance
+        for i in dnc:
+            seen = 0
+            for j in range(i, len(angles)):
+                if (angles[j] in alpha) and (seen == 0):
+                    seen = 1
+                    ind = alpha.index(angles[j])
+                    CL.insert(i, CL[ind])
+                    CD.insert(i, CD[ind])
+                    CDp.insert(i, CDp[ind])
+                    CM.insert(i, CM[ind])
+            if seen == 0:
+                worsts = [0, 0, 0, 0]
+                for j in range(len(alpha)):
+                    if CL[j] > worsts[0]:
+                        worsts[0] = CL[j]
+                    if CD[j] > worsts[1]:
+                        worsts[1] = CD[j]
+                    if CDp[j] > worsts[2]:
+                        worsts[2] = CDp[j]
+                    if CM[j] > worsts[3]:
+                        worsts[3] = CM[j]
+                CL.insert(i, worsts[0])
+                CD.insert(i, worsts[1]+0.02)
+                CDp.insert(i, worsts[2])
+                CM.insert(i, worsts[3])
+            alpha.insert(i, angles[i])
 
     try:
         # Remove savefile
