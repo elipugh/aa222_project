@@ -7,7 +7,6 @@ import time
 import random
 import sys
 
-
 # Evaluate the different characteristics
 # of an airfoil
 # Hyperparams I chose ... maybe changed later:
@@ -16,7 +15,7 @@ import sys
 #   - Max 10k iterations
 #   - Visuous flow
 #   - Evals at each degree in angles
-def evaluate(filename, angles, viscous):
+def evaluate(filename, angles, viscous, iters=3000):
     curdir = os.path.dirname(os.path.realpath(__file__))
     xf = Xfoil()
     # Normalize foil
@@ -40,7 +39,7 @@ def evaluate(filename, angles, viscous):
         # Viscous mode
         xf.cmd("v\n")
     # Allow more iterations
-    xf.cmd("ITER 1000\n")
+    xf.cmd("ITER " + str(iters) + "\n")
     # Get started with an eval
     xf.cmd("ALFA 0\n")
     # Set recording to file sf.txt
@@ -92,17 +91,6 @@ def evaluate(filename, angles, viscous):
     if len(dnc) == len(angles):
         return None
 
-    # worsts = [0, 0, 0, 0]
-    # for i in range(len(alpha)):
-    #     if CL[i] > worsts[0]:
-    #         worsts[0] = CL[i]
-    #     if CD[i] > worsts[1]:
-    #         worsts[1] = CD[i]
-    #     if CDp[i] > worsts[2]:
-    #         worsts[2] = CDp[i]
-    #     if CM[i] > worsts[3]:
-    #         worsts[3] = CM[i]
-
     if len(dnc)>0:
         print "Angles did not converge:\n\t", np.array(angles)[dnc]
         # experimental, but seems to improve
@@ -110,14 +98,18 @@ def evaluate(filename, angles, viscous):
         # performance
         for i in dnc:
             seen = 0
+            # make the unconverged numbers be the same
+            # as the one above them, but penalize 5%
             for j in range(i, len(angles)):
                 if (angles[j] in alpha) and (seen == 0):
                     seen = 1
                     ind = alpha.index(angles[j])
                     CL.insert(i, CL[ind])
-                    CD.insert(i, CD[ind])
+                    CD.insert(i, CD[ind]*1.05)
                     CDp.insert(i, CDp[ind])
                     CM.insert(i, CM[ind])
+            # When unconverged ones are at the end,
+            # set to worst value with 15% penalty
             if seen == 0:
                 worsts = [0, 0, 0, 0]
                 for j in range(len(alpha)):
@@ -130,7 +122,7 @@ def evaluate(filename, angles, viscous):
                     if CM[j] > worsts[3]:
                         worsts[3] = CM[j]
                 CL.insert(i, worsts[0])
-                CD.insert(i, worsts[1]+0.02)
+                CD.insert(i, worsts[1]*1.15)
                 CDp.insert(i, worsts[2])
                 CM.insert(i, worsts[3])
             alpha.insert(i, angles[i])
@@ -152,7 +144,9 @@ def evaluate(filename, angles, viscous):
 class Xfoil():
     def __init__(self):
         path = os.path.dirname(os.path.realpath(__file__))
-        self.xfsubprocess = subp.Popen(os.path.join(path, 'xfoil'), stdin=subp.PIPE, stdout=open(os.devnull, 'w'))
+        self.xfsubprocess = subp.Popen(os.path.join(path, 'xfoil'),
+                                       stdin=subp.PIPE,
+                                       stdout=open(os.devnull, 'w'))
         self._stdin = self.xfsubprocess.stdin
     def cmd(self, cmd):
         self.xfsubprocess.stdin.write(cmd)
@@ -161,12 +155,13 @@ class Xfoil():
 
 # Example
 if __name__ == "__main__":
-    alpha, CL, CD, CDp, CM, Top_Xtr, Bot_Xtr = evaluate("/users/EliPugh/custom4.txt")
+    # hint ... use fn_2_dat() in parameterizations/helpers.py
+    # to create an airfoil file, or download one at
+    # https://m-selig.ae.illinois.edu/ads/coord_database.html
+    # be cautious ... points need to be in XFOIL ordering
+    alpha, CL, CD, CDp, CM = evaluate("custom_airfoil.dat")
     print("alpha    :", alpha)
     print("CL       :", CL)
     print("CD       :", CD)
     print("CDp      :", CDp)
     print("CM       :", CM)
-    print("Top_Xtr  :", Top_Xtr)
-
-    print("Bot_Xtr  :", Bot_Xtr)
