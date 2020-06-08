@@ -1,5 +1,7 @@
 # Final Project AA222
 
+Joint work with [Ethan](https://github.com/ezshen)!
+
 Check out our [report](report.pdf)!
 
 Or check out some [plots & exploration](results/plotting.ipynb)!
