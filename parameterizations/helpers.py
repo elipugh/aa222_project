@@ -4,7 +4,7 @@ import numpy as np
 def fn_2_dat(filename, upper, lower):
     # get a grid of points approximating
     # the upper and lower edge of the foil
-    x = np.linspace(0.0, 1.0, 150)
+    x = np.linspace(0.0, 1.0, 100)
     foil_up = upper(x)
     foil_lo = lower(x)
     topmax = np.max(foil_up)
