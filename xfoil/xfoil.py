@@ -93,7 +93,7 @@ def evaluate(filename, angles, viscous, iters=3000):
         return None
 
     if len(dnc)>0:
-        print("Angles did not converge:\n\t{}".format(list(np.array(angles)[dnc])))
+        print("Angles did not converge:\t{}".format(list(np.array(angles)[dnc])))
         # experimental, but seems to improve
         # accuracy of guess of unconverged
         # performance

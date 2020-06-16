@@ -30,9 +30,9 @@ class Differential_Evolution_Optimizer():
                 weights[i] -= (len(objs[i]) - len(set(objs[i])))/len(objs[i])
             obj = np.dot( (np.dot(weights,objs) / np.sum(weights)), yaw_weights )
 
-        reg = np.linalg.norm(pts)*4
-        reg += np.linalg.norm([pts[i-1]-pts[i] for i in range(1,len(pts))])*30
-        print("\tRegularized : {}\n".format(obj + reg))
+        reg = np.linalg.norm(pts)*2
+        reg += np.linalg.norm([pts[i-1]-pts[i] for i in range(1,len(pts))])*10
+        print("\t  Regularized : {}\n".format(obj + reg))
         return obj + reg
 
     # Nelder Mead Optimization

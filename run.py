@@ -42,7 +42,7 @@ reps = None
 # Also note, this is doing regularization
 # to make airfoils smoother. Check out
 # optimizers/differential_evolution.py
-global_opt = False
+global_opt = True
 popsize=None
 #========================================#
 
@@ -106,10 +106,10 @@ def evaluation(x, parameterization, avg=True, ticks=None, iters=3000):
     if not visc:
         obj = np.abs(CDp)
 
-    print("{}  Eval:".format(datetime.now().time().isoformat(timespec='seconds')))
+    print("\n{}  Eval:".format(datetime.now().time().isoformat(timespec='seconds')))
     print("\t  Design    : {}".format(list(np.around(x, decimals=3))))
     print("\t  Drags     : {}".format(obj))
-    print("\t  Objective : {}\n".format(np.around(np.array(obj).dot(weights), decimals=4)))
+    print("\t  Objective : {}".format(np.around(np.array(obj).dot(weights), decimals=4)))
 
     if avg:
         return np.array(obj).dot(weights)
