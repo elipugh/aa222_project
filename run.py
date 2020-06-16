@@ -2,6 +2,7 @@ import numpy as np
 from xfoil import xfoil
 import os
 import random
+from datetime import datetime
 
 from parameterizations.helpers import fn_2_dat
 from parameterizations.naca import Airfoil as NacaAirfoil
@@ -105,10 +106,10 @@ def evaluation(x, parameterization, avg=True, ticks=None, iters=3000):
     if not visc:
         obj = np.abs(CDp)
 
-    print("Eval:")
-    print("\tDesign    : {}".format(list(np.around(x, decimals=3))))
-    print("\tDrags     : {}".format(obj))
-    print("\tObjective : {}\n".format(np.around(np.array(obj).dot(weights), decimals=4)))
+    print("{}  Eval:".format(datetime.now().time().isoformat(timespec='seconds')))
+    print("\t  Design    : {}".format(list(np.around(x, decimals=3))))
+    print("\t  Drags     : {}".format(obj))
+    print("\t  Objective : {}\n".format(np.around(np.array(obj).dot(weights), decimals=4)))
 
     if avg:
         return np.array(obj).dot(weights)
