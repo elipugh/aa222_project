@@ -19,6 +19,9 @@ parameterization="Interpolate"
 
 # The rest are set to good values
 # later, if left unset
+# Note that the auto initializations
+# are roughly optimal, so you're
+# unlikely to see much improvement
 
 # Initial point
 x0 = None

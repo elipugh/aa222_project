@@ -19,7 +19,7 @@ class Nelder_Mead_Optimizer():
                                 5.321, 4.697, 4.033, 3.368,
                                 2.736, 2.162, 1.661])
         if self.reps == 1:
-            obj = np.dot(self.f(pt, *(self.args)), yaw_weights)
+            obj = np.dot(self.f(pts, *(self.args)), yaw_weights)
         else:
             objs = [[] for _ in range(self.reps)]
             weights = np.ones(self.reps)
