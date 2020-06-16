@@ -65,7 +65,7 @@ def evaluate(filename, angles, viscous, iters=3000):
         # results into arrays to return
         with open(savefile, "r") as f:
             for _ in range(12):
-                f.next()
+                f.readline()
             for line in f:
                 if line is not None:
                     r = line.replace("-", " -").split()
@@ -92,7 +92,7 @@ def evaluate(filename, angles, viscous, iters=3000):
         return None
 
     if len(dnc)>0:
-        print "Angles did not converge:\n\t", np.array(angles)[dnc]
+        print("Angles did not converge:\n\t{}".format(list(np.array(angles)[dnc])))
         # experimental, but seems to improve
         # accuracy of guess of unconverged
         # performance
@@ -147,10 +147,10 @@ class Xfoil():
         self.xfsubprocess = subp.Popen(os.path.join(path, 'xfoil'),
                                        stdin=subp.PIPE,
                                        stdout=open(os.devnull, 'w'))
-        self._stdin = self.xfsubprocess.stdin
     def cmd(self, cmd):
-        self.xfsubprocess.stdin.write(cmd)
+        self.xfsubprocess.stdin.write(cmd.encode('utf-8'))
     def wait_to_finish(self):
+        self.xfsubprocess.stdin.close()
         self.xfsubprocess.wait()
 
 # Example
@@ -159,9 +159,9 @@ if __name__ == "__main__":
     # to create an airfoil file, or download one at
     # https://m-selig.ae.illinois.edu/ads/coord_database.html
     # be cautious ... points need to be in XFOIL ordering
-    alpha, CL, CD, CDp, CM = evaluate("custom_airfoil.dat")
-    print("alpha    :", alpha)
-    print("CL       :", CL)
-    print("CD       :", CD)
-    print("CDp      :", CDp)
-    print("CM       :", CM)
+    alpha, CL, CD, CDp, CM = evaluate("custom_airfoil.dat", [0], False)
+    print("alpha    :{}".format(alpha))
+    print("CL       :{}".format(CL))
+    print("CD       :{}".format(CD))
+    print("CDp      :{}".format(CDp))
+    print("CM       :{}".format(CM))

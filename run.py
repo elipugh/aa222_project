@@ -135,11 +135,11 @@ else:
         n = 200
     opt = sp.minimize(evaluation, x0, args=args, method="Nelder-Mead", options={'maxiter': n})
 
-print "\n\n"
+print("\n\n")
 if parameterization != "NACA":
     print(opt.message)
-print("Iters: ", opt.nit)
-print("Design:\n", list(np.around(opt.x,decimals=4)))
-print("Objective: ", np.around(opt.fun,decimals=6))
+print("Iters: {}".format(opt.nit))
+print("Design:\n{}".format(list(np.around(opt.x,decimals=4))))
+print("Objective: {}".formay(np.around(opt.fun,decimals=6)))
 
 
