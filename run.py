@@ -95,7 +95,7 @@ def evaluation(x, parameterization, avg=True, ticks=None, iters=3000):
     if metrics is None:
         # uh oh, nothing converged,
         # probably very bad design?
-        alpha, CL, CD, CDp, CM = [[np.inf]*len(angles) for _ in range(5)]
+        alpha, CL, CD, CDp, CM = [[.2]*len(angles) for _ in range(5)]
     else:
         alpha, CL, CD, CDp, CM = metrics
 
