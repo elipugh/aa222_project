@@ -1,4 +1,5 @@
 import subprocess as subp
+import psutil
 import numpy as np
 import os
 import sys
@@ -150,7 +151,12 @@ class Xfoil():
     def cmd(self, cmd):
         self.xfsubprocess.stdin.write(cmd.encode('utf-8'))
     def wait_to_finish(self):
+        p = psutil.Process(self.xfsubprocess.pid)
         self.xfsubprocess.stdin.close()
+        try:
+            p.wait(timeout=60)
+        except psutil.TimeoutExpired:
+            p.kill()
         self.xfsubprocess.wait()
 
 # Example
