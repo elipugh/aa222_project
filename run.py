@@ -1,5 +1,4 @@
 import numpy as np
-import scipy.optimize as sp
 from xfoil import xfoil
 import os
 import random
@@ -11,6 +10,27 @@ from parameterizations.naca_parsec_mix import Airfoil as MixAirfoil
 from parameterizations.inter import Airfoil as InterAirfoil
 
 from optimizers.fib import Fib_Optimizer
+from optimizers.nelder_mead import Nelder_Mead_Optimizer
+
+
+#========================================#
+# Change this to change type of airfoil
+parameterization="Interpolate"
+
+# The rest are set to good values
+# later, if left unset
+
+# Initial point
+x0 = None
+# Evaluation Args
+args = None
+# Optimizer Evaluations (not quite iters)
+n = None
+# If you want to repeat evaluations
+# at multiple points very close to each
+# design point to denoise objective
+reps = None
+#========================================#
 
 
 # Perform an objective function
@@ -83,15 +103,6 @@ def evaluation(x, parameterization, avg=True, ticks=None, iters=3000):
         return obj
 
 
-# Change this to change type of airfoil
-parameterization="Interpolate"
-# Initial point
-x0 = None
-# Evaluation Args
-args = None
-# Opt Iterations
-n = None
-
 # Note that these initializations are roughly optimal,
 # so you're unlikely to see much improvement
 # The exception is NACA, where Fib Search Opt is used
@@ -108,18 +119,21 @@ if x0 is None:
         x0 = [0.0372, 0.0374, 0.0204, 0.0301, 0.0367, 0.0206, 0.0114, 0.0038,
               0.003, 0.0001, -0.001, -0.0021, -0.0031, -0.003, -0.003]
 
+# These are suggested args ... you can change
+# them if you know what you're doing >;)
+# If you want help, reach out, esp on Interpolated :)
 if args is None:
     if parameterization == "PARSEC":
-        args = (parameterization,True,None)
+        args = (parameterization,False,None)
     if parameterization == "NACA":
         args = (parameterization,False)
     if parameterization == "Mixed":
-        args = (parameterization,True,None)
+        args = (parameterization,False,None)
     if parameterization == "Interpolate":
         ticks = np.linspace(0,np.pi/2,10)
         ticks = np.array([(0.5*(1.0-np.cos(x))) for x in ticks])
         ticks = np.hstack([ticks, np.linspace(0.5,1,7)[1:]])
-        args = (parameterization,True,ticks)
+        args = (parameterization,False,ticks)
 
 print("\n\n PARAMETERIZATION\n==================\n\n{}\n".format(parameterization))
 print(" INITIALIZATION\n================\n\n{}\n".format(x0))
@@ -129,17 +143,21 @@ if parameterization == "NACA":
         a, b = 0.34, 0.50
     if n is None:
         n = 30
-    opt = Fib_Optimizer(evaluation, x0, n, a, b, args=args)
+    if reps is None:
+        reps = 3
+    opt = Fib_Optimizer(evaluation, x0, n, a, b, reps=reps, args=args)
 else:
     if n is None:
         n = 200
-    opt = sp.minimize(evaluation, x0, args=args, method="Nelder-Mead", options={'maxiter': n})
+    if reps is None:
+        reps = 1
+    opt = Nelder_Mead_Optimizer(evaluation, x0, n, reps=reps, args=args)
 
 print("\n\n")
 if parameterization != "NACA":
     print(opt.message)
 print("Iters: {}".format(opt.nit))
 print("Design:\n{}".format(list(np.around(opt.x,decimals=4))))
-print("Objective: {}".formay(np.around(opt.fun,decimals=6)))
+print("Objective: {}".format(np.around(opt.fun,decimals=6)))
 
 
