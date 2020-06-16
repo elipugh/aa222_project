@@ -11,6 +11,3 @@ The main script is [run.py](run.py). Interfacing with XFOIL is done in [xfoil/xf
 Here's a visualization of truncated PARSEC optimization!
 
 ![](results/plots/trunc_parsec.gif)
-
-
-ToDo: currently only runs on python2 because of the xfoil subprocess.subp() call. We will adjust to include python3 support soon.. should be able to just change to subprocess.run().
