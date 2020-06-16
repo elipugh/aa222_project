@@ -171,11 +171,11 @@ if parameterization == "NACA":
     )
 elif global_opt:
     if n is None:
-        n = 20
+        n = 25
     if reps is None:
         reps = 1
     if popsize is None:
-        popsize = 10
+        popsize = 15
     opt = Differential_Evolution_Optimizer(
         evaluation,
         bounds,
