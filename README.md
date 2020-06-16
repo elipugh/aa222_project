@@ -1,6 +1,6 @@
 # Optimization of Low-Windspeed Bicycle Airfoils
 
-Joint work with [Ethan](https://github.com/ezshen) for [AA222](aa222.stanford.edu)!
+Joint work with [Ethan](https://github.com/ezshen) for [AA222](https://aa222.stanford.edu)!
 
 Check out our [report](report.pdf)!
 
