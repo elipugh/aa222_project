@@ -11,6 +11,7 @@ from parameterizations.inter import Airfoil as InterAirfoil
 
 from optimizers.fib import Fib_Optimizer
 from optimizers.nelder_mead import Nelder_Mead_Optimizer
+from optimizers.differential_evolution import Differential_Evolution_Optimizer
 
 
 #========================================#
@@ -33,6 +34,15 @@ n = None
 # at multiple points very close to each
 # design point to denoise objective
 reps = None
+# SLOW but does global optimization.
+# Mostly just for kicks currently.
+# Currently only for interpolate,
+# ez to extend to the others though
+# Also note, this is doing regularization
+# to make airfoils smoother. Check out
+# optimizers/differential_evolution.py
+global_opt = False
+popsize=None
 #========================================#
 
 
@@ -105,7 +115,6 @@ def evaluation(x, parameterization, avg=True, ticks=None, iters=3000):
     else:
         return obj
 
-
 # Note that these initializations are roughly optimal,
 # so you're unlikely to see much improvement
 # The exception is NACA, where Fib Search Opt is used
@@ -138,6 +147,9 @@ if args is None:
         ticks = np.hstack([ticks, np.linspace(0.5,1,7)[1:]])
         args = (parameterization,False,ticks)
 
+if global_opt:
+    bounds = [(e-.02,e+.02) for e in x0]
+
 print("\n\n PARAMETERIZATION\n==================\n\n{}\n".format(parameterization))
 print(" INITIALIZATION\n================\n\n{}\n".format(x0))
 
@@ -148,13 +160,42 @@ if parameterization == "NACA":
         n = 30
     if reps is None:
         reps = 3
-    opt = Fib_Optimizer(evaluation, x0, n, a, b, reps=reps, args=args)
+    opt = Fib_Optimizer(
+        evaluation,
+        x0,
+        n,
+        a,
+        b,
+        reps=reps,
+        args=args
+    )
+elif global_opt:
+    if n is None:
+        n = 20
+    if reps is None:
+        reps = 1
+    if popsize is None:
+        popsize = 10
+    opt = Differential_Evolution_Optimizer(
+        evaluation,
+        bounds,
+        n,
+        reps=reps,
+        args=args,
+        popsize=popsize
+    )
 else:
     if n is None:
         n = 200
     if reps is None:
         reps = 1
-    opt = Nelder_Mead_Optimizer(evaluation, x0, n, reps=reps, args=args)
+    opt = Nelder_Mead_Optimizer(
+        evaluation,
+        x0,
+        n,
+        reps=reps,
+        args=args
+    )
 
 print("\n\n")
 if parameterization != "NACA":
