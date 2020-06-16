@@ -14,9 +14,10 @@ class Nelder_Mead_Optimizer():
 
     # This repeats the evaluation with very slightly
     # different values to get more accurate drag number
-    def repf(self, pt):
-        yaw_weights = np.array([6.641, 6.55, 6.283, 5.863, 5.321, 4.697,
-                                4.033, 3.368, 2.736, 2.162, 1.661])
+    def repf(self, pts):
+        yaw_weights = np.array([6.641, 6.55, 6.283, 5.863,
+                                5.321, 4.697, 4.033, 3.368,
+                                2.736, 2.162, 1.661])
         if self.reps == 1:
             obj = np.dot(self.f(pt, *(self.args)), yaw_weights)
         else:
@@ -44,5 +45,24 @@ class Nelder_Mead_Optimizer():
 
 # Example
 if __name__ == "__main__":
-    # todo
-    pass
+    def rosenbrock(X):
+        """
+        Good R^2 -> R^1 function for optimization
+        http://en.wikipedia.org/wiki/Rosenbrock_function
+        """
+        x = X[0]
+        y = X[1]
+        a = 1. - x
+        b = y - x*x
+        obj = a*a + b*b*100.
+        print(obj)
+        return obj
+
+    try:
+        opt = Nelder_Mead_Optimizer(rosenbrock, np.array([0.,0.]), 100, 3)
+        print(opt.message)
+        print("Iters: {}".format(opt.nit))
+        print("Design:\n{}".format(list(opt.x)))
+        print("Objective: {}".format(np.around(opt.fun,decimals=6)))
+    except:
+        print("sorry ... change line 36 to self.f instead of self.repf")
