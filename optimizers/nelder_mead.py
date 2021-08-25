@@ -3,48 +3,41 @@ import numpy as np
 from copy import copy
 import scipy.optimize as sp
 
+# This is just my wrapper for Nelder Mead, but you could
+# easily change this wrapper class do do LBFGS or something
+# similar
 class Nelder_Mead_Optimizer():
-    def __init__(self, f, x0, n, reps=1, args=()):
-        self.args = args
-        self.reps = reps
+    def __init__(self, f, x0, n):
+        # Function to optimize
         self.f = f
+        # Initial starting point
         self.x0 = x0
+        # Number of iterations
         self.nit = n
-        self.optimize()
 
-    # This repeats the evaluation with very slightly
-    # different values to get more accurate drag number
-    def repf(self, pts):
-        yaw_weights = np.array([6.641, 6.55, 6.283, 5.863,
-                                5.321, 4.697, 4.033, 3.368,
-                                2.736, 2.162, 1.661])
-        if self.reps == 1:
-            obj = np.dot(self.f(pts, *(self.args)), yaw_weights)
-        else:
-            objs = [[] for _ in range(self.reps)]
-            weights = np.ones(self.reps)
-            for i in range(self.reps):
-                npt = pt + np.random.normal(0, np.mean(pt)/20, pt.shape)
-                objs[i] = self.f(npt, *(self.args))
-                weights[i] -= (len(objs[i]) - len(set(objs[i])))/len(objs[i])
-            obj = np.dot( (np.dot(weights,objs) / np.sum(weights)), yaw_weights )
-        return obj
-
-    # Nelder Mead Optimization
+    # This performs Nelder Mead Optimization
     def optimize(self):
         self.opt = sp.minimize(
-            self.repf,
+            self.f,
             self.x0,
             method="Nelder-Mead",
             options={'maxiter': self.nit}
         )
+        # Set the output of the optimizer
         self.message = self.opt.message
+        # Number of iterations to convergence
         self.nit = self.opt.nit
+        # Value of the optimal solution
         self.fun = self.opt.fun
+        # Optimal solution
         self.x = self.opt.x
 
+        
 # Example
 if __name__ == "__main__":
+    # Example of an arbitrary black-box function:
+    # Here's where you would put your software shtuff.
+    # Anything that takes in vector, outputs score
     def rosenbrock(X):
         """
         Good R^2 -> R^1 function for optimization
@@ -58,11 +51,15 @@ if __name__ == "__main__":
         print(obj)
         return obj
 
-    try:
-        opt = Nelder_Mead_Optimizer(rosenbrock, np.array([0.,0.]), 100, 3)
-        print(opt.message)
-        print("Iters: {}".format(opt.nit))
-        print("Design:\n{}".format(list(opt.x)))
-        print("Objective: {}".format(np.around(opt.fun,decimals=6)))
-    except:
-        print("sorry ... change line 36 to self.f instead of self.repf")
+    # Choose initial design. Nelder Mead will have easier
+    # time optimizing if the initial design point is decent
+    x0 = np.array([0.,0.])
+    # Make an optimizer with an initial point, max 100 iterations
+    opt = Nelder_Mead_Optimizer(rosenbrock, x0, 100)
+    # Do the optimization
+    opt.optimize()
+    # Get optimization output and print it for user
+    print(opt.message)
+    print("Iters: {}".format(opt.nit))
+    print("Design:\n{}".format(list(opt.x)))
+    print("Objective: {}".format(np.around(opt.fun,decimals=6)))
